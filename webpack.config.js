@@ -2,11 +2,11 @@ const path = require('path');
 // ExtractTextPlugin不支持webpack4，替换成mini-css-extract-plugin
 // const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const miniCssExtractPlugin = require('mini-css-extract-plugin');
-console.log(path.resolve(__dirname, './dist'))
-console.log(__dirname)
 module.exports = {
+  // Webpack 在寻找相对路径的文件时会以 context 为根目录，context 默认为执行启动 Webpack 时所在的当前工作目录
+  context: path.resolve(__dirname, './src'),
   // JavaScript 执行入口文件
-  entry: './src/main.js',
+  entry: './main.js',
   output: {
     // 把所有依赖的模块合并输出到一个 bundle.js 文件
     filename: 'bundle.js',
