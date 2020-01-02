@@ -1,1 +1,5 @@
-console.log(21111124264222)
+import util from './test.js'
+import './main.css'
+util.test('测试es6代码')
+util.test2('测试es6ss代码')
+console.log(21124264222)
