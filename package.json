@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack-dev-server --progress --config build/webpack.dev.conf.js",
+    "build": "webpack --config build/webpack.prod.conf.js"
   },
   "repository": {
     "type": "git",
@@ -19,11 +21,13 @@
   "homepage": "https://github.com/fanqingyun/awesome-webpack#readme",
   "devDependencies": {
     "css-loader": "^3.4.0",
+    "html-webpack-plugin": "^3.2.0",
     "mini-css-extract-plugin": "^0.9.0",
     "style-loader": "^1.1.2",
     "webpack": "^4.41.5",
     "webpack-cli": "^3.3.10",
-    "webpack-dev-server": "^3.10.1"
+    "webpack-dev-server": "^3.10.1",
+    "webpack-merge": "^4.2.2"
   },
   "dependencies": {}
 }
