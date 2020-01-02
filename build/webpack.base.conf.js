@@ -1,29 +1,16 @@
 // 模板,这样就不用手动把打包后的js，css等的文件路径加入index.html文件，也不用手动把index.html文件加入打包的路径里
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-// 压缩js文件
-const UglifyWebpackPlugin = require("uglifyjs-webpack-plugin");
 // 将css文件从js文件中分离出来
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-// 压缩css文件
-const OptimizeCssAssetsWebpackPlugin = require("optimize-css-assets-webpack-plugin");
-// 打包前先清空输出目录
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path = require("path");
 module.exports = {
   entry: ["./src/main.js"],
-  // 压缩js和css文件
-  optimization: {
-    minimizer: [
-      new UglifyWebpackPlugin({ parallel: 4 }),
-      new OptimizeCssAssetsWebpackPlugin()
-    ]
-  },
   module: {
     rules: [
-      // 转换css，use里面的loader是从后往前开始使用的，本例子中先使用css-loader处理后，再使用style-loader
-      {
+       // 转换css，use里面的loader是从后往前开始使用的，本例子中先使用css-loader处理后，再使用style-loader
+       {
         test: /\.css$/,
-        use: [{ loader: MiniCssExtractPlugin.loader }, "css-loader"],
+        use: [{ loader: MiniCssExtractPlugin.loader }, "css-loader", "postcss-loader"],
         exclude: /node_modules/
         // include: path.resolve(__dirname, "../src")
       },
@@ -32,16 +19,18 @@ module.exports = {
         use: [
           { loader: MiniCssExtractPlugin.loader },
           "css-loader",
+          "postcss-loader",
           "less-loader"
         ],
         exclude: /node_modules/,
         include: path.resolve(__dirname, "../src")
       },
       {
-        test: /\.scss$/,
+        test: /\.s[ac]ss$/,
         use: [
           { loader: MiniCssExtractPlugin.loader },
           "css-loader",
+          "postcss-loader",
           "sass-loader"
         ],
         exclude: /node_modules/,
@@ -73,12 +62,16 @@ module.exports = {
         ],
         // include: path.resolve(__dirname, "src"),
         exclude: /node_modules/
+      },
+      // typesript
+      {
+        test: /\.ts$/,
+        loader: 'awesome-typescript-loader'
       }
     ]
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: "index.html" }),
     new MiniCssExtractPlugin({ filename: "css/[name].css" }),
-    new CleanWebpackPlugin()
+    new HtmlWebpackPlugin({ template: "index.html" })
   ]
 };
