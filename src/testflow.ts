@@ -7,5 +7,4 @@ const util =  {
     return str.length
   }
 }
-// util.getLength(12)
 export default util
