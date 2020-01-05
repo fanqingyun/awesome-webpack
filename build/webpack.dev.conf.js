@@ -1,5 +1,6 @@
 const merge = require('webpack-merge')
 const common = require('./webpack.base.conf.js')
+const webpack = require('webpack')
 const path = require('path')
 
 module.exports = merge(common, {
@@ -23,5 +24,44 @@ module.exports = merge(common, {
     proxy: {
       '/api': 'http://localhost:3000'
     }
-  }
+  },
+  module: {
+    rules: [
+      // 转换css，use里面的loader是从后往前开始使用的，本例子中先使用css-loader处理后，再使用style-loader
+      {
+        test: /\.css$/,
+        use: [{ loader: 'style-loader' }, 'css-loader', 'postcss-loader'],
+        exclude: /node_modules/
+        // include: path.resolve(__dirname, "../src")
+      },
+      {
+        test: /\.less$/,
+        use: [
+          { loader: 'style-loader' },
+          'css-loader',
+          'postcss-loader',
+          'less-loader'
+        ],
+        exclude: /node_modules/,
+        include: path.resolve(__dirname, '../src')
+      },
+      {
+        test: /\.s[ac]ss$/,
+        use: [
+          { loader: 'style-loader' },
+          'css-loader',
+          'postcss-loader',
+          'sass-loader'
+        ],
+        exclude: /node_modules/,
+        include: path.resolve(__dirname, '../src')
+      }
+    ]
+  },
+  plugins: [
+    // 配置环境，区别生产环境和开发环境
+    new webpack.DefinePlugin({
+      'process.env': require('../config/dev.env')
+    })
+  ]
 })

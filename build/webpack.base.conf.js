@@ -1,14 +1,15 @@
 const utils = require('./utils')
 // 模板,这样就不用手动把打包后的js，css等的文件路径加入index.html文件，也不用手动把index.html文件加入打包的路径里
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-// 将css文件从js文件中分离出来
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+// 复制静态资源
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 // 进行多线程执行
 const HappyPack = require('happypack')
 const os = require('os')
 const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length })
-
 const path = require('path')
+
+console.log(process.env.NODE_ENV)
 module.exports = {
   entry: ['./src/main.js'],
   resolve: {
@@ -39,35 +40,6 @@ module.exports = {
         loader: 'tslint-loader',
         // 把 tslint-loader 的执行顺序放到最前面，防止其它 Loader 把处理后的代码交给 tslint-loader 去检查
         enforce: 'pre'
-      },
-      // 转换css，use里面的loader是从后往前开始使用的，本例子中先使用css-loader处理后，再使用style-loader
-      {
-        test: /\.css$/,
-        use: [{ loader: MiniCssExtractPlugin.loader }, 'css-loader', 'postcss-loader'],
-        exclude: /node_modules/
-        // include: path.resolve(__dirname, "../src")
-      },
-      {
-        test: /\.less$/,
-        use: [
-          { loader: MiniCssExtractPlugin.loader },
-          'css-loader',
-          'postcss-loader',
-          'less-loader'
-        ],
-        exclude: /node_modules/,
-        include: path.resolve(__dirname, '../src')
-      },
-      {
-        test: /\.s[ac]ss$/,
-        use: [
-          { loader: MiniCssExtractPlugin.loader },
-          'css-loader',
-          'postcss-loader',
-          'sass-loader'
-        ],
-        exclude: /node_modules/,
-        include: path.resolve(__dirname, '../src')
       },
       // 加载图片
       {
@@ -100,12 +72,6 @@ module.exports = {
         use: [
           {
             loader: 'happypack/loader?id=babel'
-            // options: {
-            //   presets: ["@babel/preset-env", "@babel/react"],
-            //   plugins: [
-            //     [require("@babel/plugin-proposal-decorators"), { legacy: true }]
-            //   ]
-            // }
           }
         ],
         // include: path.resolve(__dirname, "src"),
@@ -114,11 +80,14 @@ module.exports = {
     ]
   },
   plugins: [
-    new MiniCssExtractPlugin({
-      filename: 'css/[name].[hash].css',
-      chunkFilename: 'css/[id].[hash].css'
-    }),
     new HtmlWebpackPlugin({ template: 'index.html' }),
+    new CopyWebpackPlugin([
+      {
+        from: path.resolve(__dirname, '../static'),
+        to: 'static',
+        ignore: ['.*']
+      }
+    ]),
     new HappyPack({
       // 用唯一的标识符 id 来代表当前的 HappyPack 是用来处理一类特定的文件
       id: 'babel',

@@ -5,11 +5,12 @@ module.exports = {
     assetsPublicPath: '/', // 相对文件路径
     proxyTable: {
       '/api': {
-        // target: 'http://192.1.1.205:10016/systex_nbuWeb/api',
-        target: 'http://192.1.1.205:10023/systex_nbuWeb/api',
+        // target: 'http://192.1.1.148:9000/systex_nbuWeb/api', 
+        target: 'http://192.1.1.205:10016/systex_nbuWeb/api',
+        // target: 'http://192.1.1.205:10023/systex_nbuWeb/api',
         changeOrigin: true, // 是否跨域
         pathRewrite: {
-          '^/api': '' //  需要rewrite的,
+          '^/api': '' // 需要rewrite的,
         }
       }
     },
@@ -32,7 +33,7 @@ module.exports = {
     // 开启静态文件的Gzip压缩
     // 如果是true 的话  需要 npm install --save-dev compression-webpack-plugin
     productionGzip: false,
-    productionGzipExtensions: ['js', 'css']
+    productionGzipExtensions: ['js', 'css'],
 
     // 打包完成显示包大小的状态分析
     // `npm run build --report`

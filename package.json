@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack-dev-server --progress --config build/webpack.dev.conf.js",
     "build": "webpack --config build/webpack.prod.conf.js",
-    "lint": "eslint --ext .js src/",
+    "lint": "eslint --ext .js --ext .vue src/",
     "lint-fix": "eslint --fix **/*.js"
   },
   "repository": {
@@ -33,6 +33,7 @@
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "clean-webpack-plugin": "^3.0.0",
+    "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^3.4.0",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.0",

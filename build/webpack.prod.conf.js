@@ -1,5 +1,6 @@
 const merge = require('webpack-merge')
 const common = require('./webpack.base.conf.js')
+const webpack = require('webpack')
 const path = require('path')
 // 压缩js文件
 const UglifyWebpackPlugin = require('uglifyjs-webpack-plugin')
@@ -10,7 +11,7 @@ const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plug
 // 打包前先清空输出目录
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 // 多线程压缩
-const ParallelUglifyPlugin = require('webpack-parallel-uglify-plugin')
+// const ParallelUglifyPlugin = require('webpack-parallel-uglify-plugin')
 module.exports = merge(common, {
   // 配置模型：生产环境
   mode: 'production',
@@ -22,42 +23,83 @@ module.exports = merge(common, {
     // 上线时配置的cdn地址
     // publicPath: '../dist'
   },
-  // 压缩js和css文件
   optimization: {
+    // 分离chunks, 分离不常变化的文件，如 node_modules 下引用的库
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        vendor: {
+          name: 'vendor',
+          test: /[\\/]node_modules[\\/]/,
+          priority: 10,
+          chunks: 'initial' // 只打包初始时依赖的第三方
+        }
+      }
+    },
     minimizer: [
-      new UglifyWebpackPlugin({ parallel: 4 }),
-      new OptimizeCssAssetsWebpackPlugin()
+      new UglifyWebpackPlugin({
+        uglifyOptions: {
+          compress: {
+            drop_debugger: true,
+            drop_console: true
+          },
+          warnings: false
+        },
+        cache: true,
+        parallel: true,
+        sourceMap: false // set to true if you want JS source maps
+      }),
+      new OptimizeCssAssetsWebpackPlugin({})
     ]
   },
+  // optimization: {
+  //   minimizer: [
+  //     new UglifyWebpackPlugin({ parallel: 4 }),
+  //     new OptimizeCssAssetsWebpackPlugin()
+  //   ]
+  // },
   module: {
     rules: [
-
+      // 转换css，use里面的loader是从后往前开始使用的，本例子中先使用css-loader处理后，再使用style-loader
+      {
+        test: /\.css$/,
+        use: [{ loader: MiniCssExtractPlugin.loader }, 'css-loader', 'postcss-loader'],
+        exclude: /node_modules/
+        // include: path.resolve(__dirname, "../src")
+      },
+      {
+        test: /\.less$/,
+        use: [
+          { loader: MiniCssExtractPlugin.loader },
+          'css-loader',
+          'postcss-loader',
+          'less-loader'
+        ],
+        exclude: /node_modules/,
+        include: path.resolve(__dirname, '../src')
+      },
+      {
+        test: /\.s[ac]ss$/,
+        use: [
+          { loader: MiniCssExtractPlugin.loader },
+          'css-loader',
+          'postcss-loader',
+          'sass-loader'
+        ],
+        exclude: /node_modules/,
+        include: path.resolve(__dirname, '../src')
+      }
     ]
   },
   plugins: [
-    new MiniCssExtractPlugin({ filename: 'css/[name].css' }),
-    new CleanWebpackPlugin(),
-    // 使用 ParallelUglifyPlugin 并行压缩输出的 JS 代码
-    new ParallelUglifyPlugin({
-      // 传递给 UglifyJS 的参数
-      uglifyJS: {
-        output: {
-          // 最紧凑的输出
-          beautify: false,
-          // 删除所有的注释
-          comments: false
-        },
-        compress: {
-          // 在UglifyJs删除没有用到的代码时不输出警告
-          warnings: false,
-          // 删除所有的 `console` 语句，可以兼容ie浏览器
-          drop_console: true,
-          // 内嵌定义了但是只用到一次的变量
-          collapse_vars: true,
-          // 提取出出现多次但是没有定义成变量去引用的静态值
-          reduce_vars: true
-        }
-      }
-    })
+    // 配置环境，区别生产环境和开发环境
+    new webpack.DefinePlugin({
+      'process.env': require('../config/prod.env')
+    }),
+    new MiniCssExtractPlugin({
+      filename: 'css/[name].[hash].css',
+      chunkFilename: 'css/[id].[hash].css'
+    }),
+    new CleanWebpackPlugin()
   ]
 })
