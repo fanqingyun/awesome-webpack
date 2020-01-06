@@ -34,9 +34,10 @@ module.exports = {
     // 如果是true 的话  需要 npm install --save-dev compression-webpack-plugin
     productionGzip: false,
     productionGzipExtensions: ['js', 'css'],
-
+    // 是否分析代码之间的依赖
+    BundleAnalyzerPlugin: true,
     // 打包完成显示包大小的状态分析
     // `npm run build --report`
-    // bundleAnalyzerReport: process.env.npm_config_report
+    bundleAnalyzerReport: process.env.npm_config_report
   }
 }

@@ -1,23 +1,20 @@
-const utils = require('./utils')
+// const utils = require('./utils')
 // 模板,这样就不用手动把打包后的js，css等的文件路径加入index.html文件，也不用手动把index.html文件加入打包的路径里
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-// 复制静态资源
-const CopyWebpackPlugin = require('copy-webpack-plugin')
 // 进行多线程执行
 const HappyPack = require('happypack')
 const os = require('os')
 const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length })
 const path = require('path')
 
-console.log(process.env.NODE_ENV)
 module.exports = {
   entry: ['./src/main.js'],
   resolve: {
     alias: {
       '&': '../node_modules',
       '@': path.resolve('src')
-      // 比如require('./data')时,优先找data.ts->data.js->data.json
     },
+    // 比如require('./data')时,优先找data.ts->data.js->data.json
     extensions: ['.ts', '.js', '.json']
   },
   module: {
@@ -41,31 +38,6 @@ module.exports = {
         // 把 tslint-loader 的执行顺序放到最前面，防止其它 Loader 把处理后的代码交给 tslint-loader 去检查
         enforce: 'pre'
       },
-      // 加载图片
-      {
-        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: utils.assetsPath('img/[name].[hash:7].[ext]')
-        }
-      },
-      {
-        test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: utils.assetsPath('media/[name].[hash:7].[ext]')
-        }
-      },
-      {
-        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
-        }
-      },
       // ES6/ES7/JSX 转义需要 Babel 的依赖，支持装饰器
       {
         test: /\.(jsx?|tsx?)$/,
@@ -76,18 +48,36 @@ module.exports = {
         ],
         // include: path.resolve(__dirname, "src"),
         exclude: /node_modules/
+      },
+      // 加载图片
+      {
+        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+        loader: 'url-loader',
+        options: {
+          limit: 10000,
+          name: 'img/[name].[hash:7].[ext]'
+        }
+      },
+      {
+        test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
+        loader: 'url-loader',
+        options: {
+          limit: 10000,
+          name: 'media/[name].[hash:7].[ext]'
+        }
+      },
+      {
+        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+        loader: 'url-loader',
+        options: {
+          limit: 10000,
+          name: 'fonts/[name].[hash:7].[ext]'
+        }
       }
     ]
   },
   plugins: [
     new HtmlWebpackPlugin({ template: 'index.html' }),
-    new CopyWebpackPlugin([
-      {
-        from: path.resolve(__dirname, '../static'),
-        to: 'static',
-        ignore: ['.*']
-      }
-    ]),
     new HappyPack({
       // 用唯一的标识符 id 来代表当前的 HappyPack 是用来处理一类特定的文件
       id: 'babel',

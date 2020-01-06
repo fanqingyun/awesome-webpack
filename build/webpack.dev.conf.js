@@ -1,28 +1,42 @@
 const merge = require('webpack-merge')
 const common = require('./webpack.base.conf.js')
-const webpack = require('webpack')
+// const webpack = require('webpack')
 const path = require('path')
+const config = require('../config')
+const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
+const portfinder = require('portfinder')
 
-module.exports = merge(common, {
+const devWebpackConfig = merge(common, {
   // 配置模型： 开发环境
   mode: 'development',
+  devtool: 'inline-source-map',
   devServer: {
-    // 开启热模块
+    contentBase: '../web',
+    // host: 'localhost',   //服务器的ip地址
+    // port: 1573, //端口
+    // open: true,  //自动打开页面
+    // //热加载，功能：只渲染所改组件的页面效果，不会全部刷新，其他页面数据依然会存在
+    // hot: true
+    // 在开发单页应用时非常有用，它依赖于HTML5 history API，如果设置为true，所有的跳转将指向index.html
+    historyApiFallback: {
+      rewrites: [
+        { from: /.*/, to: path.posix.join(config.dev.assetsPublicPath, 'index.html') }
+      ]
+    },
     hot: true,
-    // 压缩文件,开启gzip
     compress: true,
-    // 告诉服务器从哪里提供内容,建议提供绝对路径
-    contentBase: path.join(__dirname, '../dist'),
-    // 服务器地址
-    host: 'localhost',
-    // 服务器端口
-    port: '9000',
-    // dev-server的2种形式之一
-    inline: false,
-    // 编译成功时自动打开浏览器
-    // open: true,
-    proxy: {
-      '/api': 'http://localhost:3000'
+    host: process.env.HOST || config.dev.host, // 热加载
+    // port: PORT || config.dev.port,
+    open: config.dev.autoOpenBrowser,
+    // 在浏览器上全屏显示编译的errors或warnings
+    overlay: config.dev.errorOverlay
+      ? { warnings: false, errors: true }
+      : false,
+    publicPath: config.dev.assetsPublicPath,
+    proxy: config.dev.proxyTable,
+    quiet: true, // necessary for FriendlyErrorsPlugin
+    watchOptions: {
+      poll: config.dev.poll
     }
   },
   module: {
@@ -58,10 +72,28 @@ module.exports = merge(common, {
       }
     ]
   },
-  plugins: [
-    // 配置环境，区别生产环境和开发环境
-    new webpack.DefinePlugin({
-      'process.env': require('../config/dev.env')
-    })
-  ]
+  plugins: []
+})
+// 这一步可以动态获取端口并把devWebpackConfig暴露出去
+module.exports = new Promise((resolve, reject) => {
+  portfinder.basePort = process.env.PORT || 9000
+  portfinder.getPort((err, port) => {
+    if (err) {
+      reject(err)
+    } else {
+      // console.log(devWebpackConfig)
+      // publish the new Port, necessary for e2e tests
+      process.env.PORT = port
+      // add port to devServer config
+      devWebpackConfig.devServer.port = port
+
+      // Add FriendlyErrorsPlugin
+      devWebpackConfig.plugins.push(new FriendlyErrorsPlugin({
+        compilationSuccessInfo: {
+          messages: [`Your application is running here: http://${devWebpackConfig.devServer.host}:${port}`]
+        }
+      }))
+      resolve(devWebpackConfig)
+    }
+  })
 })

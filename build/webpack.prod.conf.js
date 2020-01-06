@@ -1,25 +1,30 @@
 const merge = require('webpack-merge')
 const common = require('./webpack.base.conf.js')
-const webpack = require('webpack')
+// const webpack = require('webpack')
 const path = require('path')
-// 压缩js文件
-const UglifyWebpackPlugin = require('uglifyjs-webpack-plugin')
+const config = require('../config')
 // 将css文件从js文件中分离出来
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+// 压缩js文件
+const UglifyWebpackPlugin = require('uglifyjs-webpack-plugin')
 // 压缩css文件
 const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
 // 打包前先清空输出目录
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+// 复制静态资源
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 // 多线程压缩
 // const ParallelUglifyPlugin = require('webpack-parallel-uglify-plugin')
-module.exports = merge(common, {
+// 用于分析代码
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+const prodConfig = merge(common, {
   // 配置模型：生产环境
   mode: 'production',
   output: {
     // 打包路径
-    path: path.resolve(__dirname, '../dist'),
+    path: config.build.assetsRoot,
     // 文件名
-    filename: '[name].js'
+    filename: 'js/[name].[contenthash].js'
     // 上线时配置的cdn地址
     // publicPath: '../dist'
   },
@@ -52,25 +57,33 @@ module.exports = merge(common, {
       new OptimizeCssAssetsWebpackPlugin({})
     ]
   },
-  // optimization: {
-  //   minimizer: [
-  //     new UglifyWebpackPlugin({ parallel: 4 }),
-  //     new OptimizeCssAssetsWebpackPlugin()
-  //   ]
-  // },
   module: {
     rules: [
       // 转换css，use里面的loader是从后往前开始使用的，本例子中先使用css-loader处理后，再使用style-loader
       {
         test: /\.css$/,
-        use: [{ loader: MiniCssExtractPlugin.loader }, 'css-loader', 'postcss-loader'],
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              publicPath: '../'
+            }
+          },
+          'css-loader',
+          'postcss-loader'
+        ],
         exclude: /node_modules/
         // include: path.resolve(__dirname, "../src")
       },
       {
         test: /\.less$/,
         use: [
-          { loader: MiniCssExtractPlugin.loader },
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              publicPath: '../'
+            }
+          },
           'css-loader',
           'postcss-loader',
           'less-loader'
@@ -81,7 +94,13 @@ module.exports = merge(common, {
       {
         test: /\.s[ac]ss$/,
         use: [
-          { loader: MiniCssExtractPlugin.loader },
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              // 这个配置能让css里面的背景图片的路径正确
+              publicPath: '../'
+            }
+          },
           'css-loader',
           'postcss-loader',
           'sass-loader'
@@ -92,14 +111,25 @@ module.exports = merge(common, {
     ]
   },
   plugins: [
-    // 配置环境，区别生产环境和开发环境
-    new webpack.DefinePlugin({
-      'process.env': require('../config/prod.env')
-    }),
     new MiniCssExtractPlugin({
       filename: 'css/[name].[hash].css',
       chunkFilename: 'css/[id].[hash].css'
     }),
-    new CleanWebpackPlugin()
+    new CleanWebpackPlugin(),
+    new CopyWebpackPlugin([
+      {
+        from: path.resolve(__dirname, '../static'),
+        to: 'static',
+        ignore: ['.*']
+      }
+    ])
   ]
 })
+if (config.build.bundleAnalyzerReport) {
+  prodConfig.plugins.push(new BundleAnalyzerPlugin({
+    analyzerMode: 'disabled',
+    generateStatsFile: true,
+    statsOptions: { source: false }
+  }))
+}
+module.exports = prodConfig
