@@ -29,6 +29,8 @@ const prodConfig = merge(common, {
     // publicPath: '../dist'
   },
   optimization: {
+    // 打包时，会抽离出runtime部分
+    runtimeChunk: 'single',
     // 分离chunks, 分离不常变化的文件，如 node_modules 下引用的库
     splitChunks: {
       chunks: 'all',

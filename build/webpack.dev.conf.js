@@ -72,7 +72,9 @@ const devWebpackConfig = merge(common, {
       }
     ]
   },
-  plugins: []
+  plugins: [
+    // new webpack.HashedModulesPlugin()
+  ]
 })
 // 这一步可以动态获取端口并把devWebpackConfig暴露出去
 module.exports = new Promise((resolve, reject) => {
