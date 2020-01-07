@@ -3,6 +3,8 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 // 进行多线程执行
 const HappyPack = require('happypack')
+// vue
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const os = require('os')
 const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length })
 const path = require('path')
@@ -11,6 +13,7 @@ module.exports = {
   entry: ['./src/main.js'],
   resolve: {
     alias: {
+      'vue$': 'vue/dist/vue.esm.js',
       '&': '../node_modules',
       '@': path.resolve('src')
     },
@@ -37,6 +40,11 @@ module.exports = {
         loader: 'tslint-loader',
         // 把 tslint-loader 的执行顺序放到最前面，防止其它 Loader 把处理后的代码交给 tslint-loader 去检查
         enforce: 'pre'
+      },
+      // vue
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader'
       },
       // ES6/ES7/JSX 转义需要 Babel 的依赖，支持装饰器
       {
@@ -77,6 +85,7 @@ module.exports = {
     ]
   },
   plugins: [
+    new VueLoaderPlugin(),
     new HtmlWebpackPlugin({ template: 'index.html' }),
     new HappyPack({
       // 用唯一的标识符 id 来代表当前的 HappyPack 是用来处理一类特定的文件
