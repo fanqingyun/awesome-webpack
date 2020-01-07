@@ -45,7 +45,8 @@ const devWebpackConfig = merge(common, {
       {
         test: /\.css$/,
         use: [{ loader: 'style-loader' }, 'css-loader', 'postcss-loader'],
-        exclude: /node_modules/
+        // 因为在main.js里有引用node_modules里面的内容，所以隐藏掉
+        // exclude: /node_modules/
         // include: path.resolve(__dirname, "../src")
       },
       {
