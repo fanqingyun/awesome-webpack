@@ -15,7 +15,7 @@ module.exports = {
       '@': path.resolve('src')
     },
     // 比如require('./data')时,优先找data.ts->data.js->data.json
-    extensions: ['.ts', '.js', '.json']
+    extensions: ['jsx', '.ts', '.js', '.json']
   },
   module: {
     rules: [
